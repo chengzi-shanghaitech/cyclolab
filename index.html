@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="description" content="环肽计算生物学个人研究工作台：每日文献、研究进展、任务、作者归档、可编辑数据库、灵感与可编辑计算教程。" />
+  <title>环肽计算工作台</title>
+  <style>
+:root {
+  color-scheme: dark;
+  --bg: #070a12;
+  --panel: #0d1220;
+  --panel-2: #111827;
+  --panel-3: #171f30;
+  --line: rgba(255,255,255,.08);
+  --line-strong: rgba(255,255,255,.14);
+  --text: #f5f7fb;
+  --muted: #8d99ad;
+  --soft: #c9d1df;
+  --accent: #7ee7c4;
+  --accent-2: #8eb5ff;
+  --danger: #ff7c8a;
+  --warning: #ffd37a;
+  --radius: 20px;
+  --shadow: 0 22px 70px rgba(0,0,0,.28);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: radial-gradient(circle at 80% -10%, rgba(64,112,166,.16), transparent 30%), var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; min-height: 100vh; }
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+.app-shell { display: grid; grid-template-columns: 248px minmax(0,1fr); min-height: 100vh; }
+.sidebar { position: sticky; top:0; height:100vh; padding: 24px 18px; border-right: 1px solid var(--line); background: rgba(8,12,21,.86); backdrop-filter: blur(20px); display:flex; flex-direction:column; z-index:10; }
+.brand { display:flex; align-items:center; gap:12px; padding: 4px 8px 26px; }
+.brand-mark { width:42px; height:42px; display:grid; place-items:center; border:1px solid rgba(126,231,196,.24); border-radius:14px; color:var(--accent); background:rgba(126,231,196,.06); }
+.brand-mark svg { width:30px; }
+.brand strong { display:block; letter-spacing:.01em; }
+.brand span { display:block; color:var(--muted); font-size:12px; margin-top:2px; text-transform:uppercase; letter-spacing:.1em; }
+.nav { display:grid; gap:5px; }
+.nav-item { border:0; background:transparent; color:#9ca8ba; text-align:left; border-radius:12px; padding:11px 12px; display:flex; align-items:center; gap:11px; transition:.18s ease; }
+.nav-item span { width:20px; text-align:center; color:#718096; }
+.nav-item:hover { background:rgba(255,255,255,.04); color:#e6ebf2; }
+.nav-item.active { background:linear-gradient(90deg, rgba(126,231,196,.12), rgba(126,231,196,.04)); color:#fff; box-shadow: inset 2px 0 var(--accent); }
+.nav-item.active span { color:var(--accent); }
+.sidebar-footer { margin-top:auto; display:grid; gap:12px; }
+.sync-card { border:1px solid var(--line); border-radius:14px; padding:12px; display:flex; align-items:flex-start; gap:10px; background:rgba(255,255,255,.02); }
+.sync-card strong { font-size:13px; display:block; }
+.sync-card small { color:var(--muted); line-height:1.4; display:block; margin-top:3px; }
+.status-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 14px rgba(126,231,196,.6); margin-top:5px; flex:none; }
+.main { min-width:0; padding:0 34px 52px; }
+.topbar { height:94px; display:flex; align-items:center; justify-content:space-between; gap:20px; position:sticky; top:0; z-index:8; background:linear-gradient(to bottom, rgba(7,10,18,.96) 70%, rgba(7,10,18,0)); backdrop-filter: blur(12px); }
+.topbar h1 { margin:3px 0 0; font-size:20px; }
+.eyebrow { font-size:11px; color:var(--muted); letter-spacing:.14em; text-transform:uppercase; font-weight:700; }
+.top-actions, .hero-actions, .row { display:flex; align-items:center; gap:10px; }
+.row.end { justify-content:flex-end; }.row.wrap{flex-wrap:wrap}
+button { border-radius:11px; border:1px solid transparent; transition:.18s ease; }
+.primary-btn { background:var(--accent); color:#07120e; font-weight:760; border:1px solid rgba(255,255,255,.14); padding:10px 14px; box-shadow:0 8px 24px rgba(126,231,196,.12); }
+.primary-btn:hover { transform:translateY(-1px); filter:brightness(1.04); }
+.primary-btn.small { padding:8px 11px; font-size:13px; }
+.ghost-btn, .file-btn { background:rgba(255,255,255,.035); border:1px solid var(--line); color:var(--soft); padding:9px 12px; border-radius:11px; }
+.ghost-btn:hover, .file-btn:hover { border-color:var(--line-strong); background:rgba(255,255,255,.06); }
+.ghost-btn.full { width:100%; }
+.text-btn { border:0; background:transparent; color:var(--accent); padding:6px 0; }
+.icon-btn { width:38px; height:38px; padding:0; display:grid; place-items:center; background:rgba(255,255,255,.04); color:var(--soft); border:1px solid var(--line); }
+.mobile-menu { display:none; }
+.view { display:none; animation:fade .2s ease; }
+.view.active { display:block; }
+@keyframes fade { from{opacity:.4; transform:translateY(4px)} to{opacity:1; transform:none} }
+.card { background:linear-gradient(160deg, rgba(17,24,39,.93), rgba(11,16,29,.92)); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
+.hero { min-height:270px; padding:34px; display:grid; grid-template-columns:minmax(0,1.55fr) minmax(230px,.8fr); align-items:center; overflow:hidden; position:relative; }
+.hero:before { content:""; position:absolute; width:480px; height:480px; border-radius:50%; right:-180px; top:-260px; background:radial-gradient(circle, rgba(126,231,196,.15), transparent 65%); }
+.hero h2 { font-size:clamp(31px,4vw,54px); line-height:1.03; max-width:850px; margin:18px 0 14px; letter-spacing:-.04em; }
+.hero p { color:#aab5c6; max-width:720px; line-height:1.7; font-size:15px; }
+.pill { display:inline-flex; align-items:center; border-radius:999px; padding:6px 9px; font-size:10px; letter-spacing:.11em; font-weight:800; border:1px solid var(--line); }
+.pill.accent { color:var(--accent); border-color:rgba(126,231,196,.22); background:rgba(126,231,196,.06); }
+.cycle-visual { height:210px; position:relative; display:grid; place-items:center; }
+.core { width:74px; height:74px; border-radius:50%; display:grid; place-items:center; font-weight:800; color:#05120d; background:radial-gradient(circle at 35% 35%, #d6fff0, var(--accent)); box-shadow:0 0 70px rgba(126,231,196,.22); z-index:2; }
+.orbit { position:absolute; width:185px; height:185px; border:1px solid rgba(142,181,255,.22); border-radius:50%; }
+.orbit.o2 { width:130px; height:130px; border-style:dashed; border-color:rgba(126,231,196,.22); }
+.orbit i { position:absolute; width:12px; height:12px; border-radius:50%; background:#8eb5ff; box-shadow:0 0 18px rgba(142,181,255,.35); }
+.orbit i:nth-child(1){left:86px;top:-6px}.orbit i:nth-child(2){right:8px;top:37px}.orbit i:nth-child(3){right:8px;bottom:37px}.orbit i:nth-child(4){left:86px;bottom:-6px}.orbit i:nth-child(5){left:8px;bottom:37px}.orbit i:nth-child(6){left:8px;top:37px}
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:16px 0; }
+.stat { padding:18px 20px; }
+.stat span,.stat small { color:var(--muted); font-size:12px; display:block; }.stat strong{font-size:28px;display:block;margin:9px 0 3px}.stat small{font-size:11px}
+.dashboard-grid { display:grid; grid-template-columns:2fr 1fr; gap:16px; }.dashboard-grid>.card{padding:22px}.span-2{grid-column:auto}
+.section-head { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; margin-bottom:18px; }.section-head h3{margin:5px 0 0;font-size:17px}.muted{color:var(--muted);font-size:12px}
+.paper-list { display:grid; gap:10px; }.paper-list.compact{gap:8px}
+.paper-card { border:1px solid var(--line); border-radius:16px; padding:16px; background:rgba(255,255,255,.018); transition:.18s ease; }
+.paper-card:hover { border-color:rgba(126,231,196,.19); transform:translateY(-1px); }
+.paper-meta { display:flex; flex-wrap:wrap; gap:8px; color:var(--muted); font-size:11px; margin-bottom:8px; }.paper-meta span{display:inline-flex;align-items:center;gap:6px}.paper-meta span+span:before{content:"·";color:#49556a;margin-right:2px}
+.paper-title { font-size:15px; line-height:1.45; margin:0; }.paper-title a:hover{color:var(--accent)}
+.paper-authors { color:#aab4c4; font-size:12px; margin-top:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.paper-abstract { color:#8f9caf; font-size:12px; line-height:1.65; margin:10px 0 0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.paper-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }.paper-actions button,.paper-actions a{font-size:11px;padding:7px 9px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:#aeb8c7}.paper-actions .archived{color:var(--accent);border-color:rgba(126,231,196,.2);background:rgba(126,231,196,.06)}
+.empty { border:1px dashed var(--line-strong); border-radius:15px; padding:28px; text-align:center; color:var(--muted); font-size:13px; }
+.task-list{display:grid;gap:8px}.task-row{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:start;border-bottom:1px solid var(--line);padding:9px 0}.task-row:last-child{border-bottom:0}.task-check{width:18px;height:18px;border-radius:6px;border:1px solid #536078;background:transparent;margin-top:2px}.task-check.done{background:var(--accent);border-color:var(--accent);position:relative}.task-check.done:after{content:"✓";color:#06110d;position:absolute;inset:0;display:grid;place-items:center;font-size:12px;font-weight:900}.task-copy strong{font-size:13px;display:block;line-height:1.4}.task-copy small{color:var(--muted);font-size:11px}.task-row.done .task-copy strong{text-decoration:line-through;color:#657187}.priority{width:7px;height:7px;border-radius:50%;margin-top:7px}.priority.high{background:var(--danger)}.priority.medium{background:var(--warning)}.priority.low{background:var(--accent-2)}
+textarea,input,select{width:100%;border:1px solid var(--line);background:#0a0f1b;color:var(--text);border-radius:11px;padding:11px 12px;outline:none}textarea{resize:vertical}textarea:focus,input:focus,select:focus{border-color:rgba(126,231,196,.36);box-shadow:0 0 0 3px rgba(126,231,196,.06)}
+.trend-bars{display:grid;gap:11px}.trend-item{display:grid;grid-template-columns:minmax(110px,165px) 1fr 28px;align-items:center;gap:10px}.trend-item label{font-size:12px;color:#aab4c4}.bar-track{height:8px;background:#0b101c;border:1px solid var(--line);border-radius:99px;overflow:hidden}.bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:99px}.trend-item b{font-size:11px;color:#778399;text-align:right}.trend-bars.large .bar-track{height:11px}.trend-bars.large .trend-item{padding:4px 0}
+.section-hero { display:flex; justify-content:space-between; gap:24px; align-items:flex-end; margin:16px 0 24px; }.section-hero h2{font-size:34px;letter-spacing:-.03em;margin:6px 0 8px}.section-hero p{color:var(--muted);max-width:720px;margin:0;line-height:1.6}
+.filter-card{padding:18px;margin-bottom:16px}.filter-card>label{font-size:12px;color:var(--muted);display:block;margin-bottom:8px}.search-row{display:grid;grid-template-columns:1fr auto;gap:8px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.chips button{font-size:11px;padding:7px 9px;background:rgba(255,255,255,.03);border:1px solid var(--line);color:#95a1b3}.chips button:hover{color:var(--accent);border-color:rgba(126,231,196,.25)}
+.list-toolbar{display:flex;justify-content:space-between;align-items:center;margin:14px 0;gap:12px}.list-toolbar>div:first-child{display:flex;align-items:center;gap:10px}.segmented{display:flex;padding:3px;border-radius:10px;border:1px solid var(--line);background:#0b0f1a}.segmented button{background:transparent;color:#778399;border:0;padding:6px 9px;font-size:11px}.segmented button.active{background:#1a2232;color:#fff}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}.two-col>.card{padding:22px}.timeline{display:grid;gap:0}.timeline-item{position:relative;padding:0 0 20px 22px;border-left:1px solid #273143;margin-left:5px}.timeline-item:before{content:"";position:absolute;left:-5px;top:2px;width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px #101827}.timeline-item:last-child{border-left-color:transparent}.timeline-item h4{margin:0 0 5px;font-size:14px}.timeline-item p{color:var(--muted);font-size:12px;line-height:1.6;margin:0 0 7px}.timeline-meta{font-size:10px;color:#66738a}
+.task-board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.task-column{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.015);padding:13px;min-height:240px}.task-column h3{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:#8995a7;margin:3px 4px 12px}.task-card{border:1px solid var(--line);border-radius:13px;padding:12px;background:#101725;margin-bottom:9px}.task-card h4{margin:0 0 8px;font-size:13px;line-height:1.4}.task-card .task-footer{display:flex;justify-content:space-between;gap:10px;align-items:center;color:#748096;font-size:10px}.task-card .task-controls{display:flex;gap:5px;margin-top:10px}.task-card .task-controls button{font-size:10px;background:rgba(255,255,255,.03);border:1px solid var(--line);color:#8f9aac;padding:5px 7px}
+.archive-layout{display:grid;grid-template-columns:260px 1fr;gap:16px}.archive-layout>.card{padding:18px}.author-index{align-self:start;position:sticky;top:110px;max-height:calc(100vh - 135px);overflow:auto}.author-entry{width:100%;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;color:#9ba7b8;text-align:left;padding:10px 4px;display:flex;justify-content:space-between;gap:10px}.author-entry:hover,.author-entry.active{color:#fff}.author-entry.active{color:var(--accent)}.author-entry span{color:#667389;font-size:10px}
+.database-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.db-card{padding:20px;min-height:210px;display:flex;flex-direction:column}.db-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.db-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:rgba(142,181,255,.08);border:1px solid rgba(142,181,255,.18);color:var(--accent-2);font-weight:800}.db-card h3{font-size:16px;margin:15px 0 6px}.db-card p{color:#8f9caf;line-height:1.6;font-size:12px;margin:0}.db-tags{display:flex;flex-wrap:wrap;gap:6px;margin:13px 0}.db-tags span{font-size:10px;color:#8c99ac;padding:5px 7px;border-radius:999px;border:1px solid var(--line)}.db-card a{margin-top:auto;color:var(--accent);font-size:12px}
+.idea-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.idea-card{padding:18px;position:relative;min-height:160px}.idea-card p{font-size:13px;line-height:1.7;color:#c1c9d6;margin:4px 0 16px;white-space:pre-wrap}.idea-meta{display:flex;flex-wrap:wrap;gap:6px}.idea-meta span{font-size:10px;color:#8290a5;border:1px solid var(--line);border-radius:99px;padding:4px 7px}.idea-actions{display:flex;gap:6px;margin-top:16px}.idea-actions button{font-size:10px;padding:6px 8px;background:transparent;border:1px solid var(--line);color:#7e8a9d}
+.tutorial-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.tutorial-card{padding:22px}.tutorial-card .tut-number{font-size:11px;color:var(--accent);letter-spacing:.12em}.tutorial-card h3{font-size:18px;margin:9px 0}.tutorial-card p{font-size:12px;color:#8e9aab;line-height:1.7}.tutorial-card details{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}.tutorial-card summary{font-size:12px;color:#aeb7c6;cursor:pointer}.tutorial-card pre{overflow:auto;background:#080d17;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:11px;line-height:1.55;color:#c4d0df}.tutorial-card ul{color:#92a0b3;font-size:12px;line-height:1.7;padding-left:18px}
+.resource-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}.resource-actions button{border:1px solid var(--line);background:transparent;color:#8f9caf;border-radius:9px;padding:6px 9px;font-size:11px;cursor:pointer}.resource-actions button:hover{color:var(--text);border-color:#40506a}.resource-actions .delete{color:#c88f93}.resource-actions .delete:hover{color:#f0a6ac;border-color:#70464b}.resource-note{font-size:11px;color:#68758a;margin-top:8px}.form-help{font-size:11px;color:#6f7d91;line-height:1.5;margin-top:-4px}
+dialog{border:0;padding:0;background:transparent;color:var(--text);max-width:min(94vw,580px);width:100%}dialog.wide{max-width:min(94vw,760px)}dialog::backdrop{background:rgba(2,5,10,.72);backdrop-filter:blur(8px)}.dialog-card{background:#0e1523;border:1px solid var(--line-strong);border-radius:22px;padding:22px;box-shadow:0 30px 90px rgba(0,0,0,.55);display:grid;gap:15px}.dialog-card.wide{min-width:min(720px,90vw)}.dialog-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.dialog-head h3{margin:4px 0 0;font-size:19px}.dialog-card label{font-size:12px;color:#9aa6b8;display:grid;gap:7px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.dialog-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:4px}.settings-block{border:1px solid var(--line);padding:15px;border-radius:14px}.settings-block h4{margin:0 0 7px}.settings-block p{color:var(--muted);font-size:12px;line-height:1.6;margin:0}.danger-zone{border-color:rgba(255,124,138,.16)}.danger-btn{background:rgba(255,124,138,.08);border:1px solid rgba(255,124,138,.18);color:var(--danger);padding:9px 12px}.file-btn{display:inline-flex;cursor:pointer}
+.toast{position:fixed;right:24px;bottom:24px;background:#182131;border:1px solid var(--line-strong);padding:11px 14px;border-radius:12px;box-shadow:var(--shadow);font-size:12px;transform:translateY(20px);opacity:0;pointer-events:none;transition:.2s ease;z-index:50}.toast.show{transform:none;opacity:1}
+@media(max-width:1120px){.stats-grid{grid-template-columns:repeat(2,1fr)}.database-grid,.idea-grid{grid-template-columns:repeat(2,1fr)}.task-board{grid-template-columns:1fr}.hero{grid-template-columns:1fr 260px}}
+@media(max-width:860px){.app-shell{grid-template-columns:1fr}.sidebar{position:fixed;left:0;top:0;transform:translateX(-102%);transition:.2s ease;width:250px;box-shadow:var(--shadow)}.sidebar.open{transform:none}.main{padding:0 18px 40px}.mobile-menu{display:grid}.topbar{height:82px}.top-actions .ghost-btn{display:none}.hero{grid-template-columns:1fr}.cycle-visual{display:none}.dashboard-grid,.two-col,.archive-layout,.tutorial-grid{grid-template-columns:1fr}.author-index{position:static;max-height:none}.database-grid,.idea-grid{grid-template-columns:1fr}.section-hero{align-items:flex-start;flex-direction:column}.span-2{grid-column:auto}}
+@media(max-width:560px){.stats-grid{grid-template-columns:1fr 1fr;gap:8px}.stat{padding:14px}.hero{padding:22px;min-height:auto}.hero h2{font-size:34px}.top-actions .primary-btn{display:none}.search-row{grid-template-columns:1fr}.list-toolbar{align-items:flex-start;flex-direction:column}.form-grid{grid-template-columns:1fr}.dialog-card.wide{min-width:0}.paper-actions{gap:5px}.database-grid{gap:9px}}
+
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" role="img"><circle cx="24" cy="24" r="15" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="9" r="3"/><circle cx="37" cy="17" r="3"/><circle cx="37" cy="31" r="3"/><circle cx="24" cy="39" r="3"/><circle cx="11" cy="31" r="3"/><circle cx="11" cy="17" r="3"/></svg>
+        </div>
+        <div>
+          <strong>CycloLab</strong>
+          <span>research OS</span>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="主导航">
+        <button class="nav-item active" data-view="dashboard"><span>⌂</span>总览</button>
+        <button class="nav-item" data-view="literature"><span>◫</span>每日文献</button>
+        <button class="nav-item" data-view="progress"><span>↗</span>研究进展</button>
+        <button class="nav-item" data-view="tasks"><span>✓</span>日常任务</button>
+        <button class="nav-item" data-view="archive"><span>⌘</span>文献归档</button>
+        <button class="nav-item" data-view="databases"><span>◉</span>环肽数据库</button>
+        <button class="nav-item" data-view="ideas"><span>✦</span>突发奇想</button>
+        <button class="nav-item" data-view="tutorials"><span>›_</span>计算教程</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sync-card">
+          <span class="status-dot"></span>
+          <div>
+            <strong>本地优先</strong>
+            <small>任务/归档/灵感保存在浏览器</small>
+          </div>
+        </div>
+        <button class="ghost-btn full" id="openSettings">设置与备份</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-btn mobile-menu" id="menuBtn" aria-label="打开菜单">☰</button>
+        <div>
+          <div class="eyebrow" id="todayLabel"></div>
+          <h1 id="pageTitle">研究总览</h1>
+        </div>
+        <div class="top-actions">
+          <button class="ghost-btn" id="quickIdeaBtn">+ 记录灵感</button>
+          <button class="primary-btn" id="quickTaskBtn">+ 新任务</button>
+        </div>
+      </header>
+
+      <section class="view active" id="view-dashboard">
+        <div class="hero card">
+          <div>
+            <span class="pill accent">CYCLIC PEPTIDE COMPUTATION</span>
+            <h2>把每天的输入，沉淀成可复用的研究资产。</h2>
+            <p>文献每天首次打开时自动刷新；读过的论文一键进入作者归档；趋势、任务、灵感和教程都在同一工作台里。</p>
+            <div class="hero-actions">
+              <button class="primary-btn" data-jump="literature">查看今日文献</button>
+              <button class="ghost-btn" data-jump="tasks">整理今日任务</button>
+            </div>
+          </div>
+          <div class="cycle-visual" aria-hidden="true">
+            <div class="orbit o1"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="orbit o2"></div>
+            <div class="core">CP</div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat card"><span>今日/最新文献</span><strong id="statPapers">—</strong><small id="paperSourceStatus">等待同步</small></div>
+          <div class="stat card"><span>未完成任务</span><strong id="statTasks">0</strong><small>本地任务板</small></div>
+          <div class="stat card"><span>已读归档</span><strong id="statArchive">0</strong><small>按作者自动索引</small></div>
+          <div class="stat card"><span>灵感条目</span><strong id="statIdeas">0</strong><small>随手记，后续再分类</small></div>
+        </div>
+
+        <div class="dashboard-grid">
+          <section class="card span-2">
+            <div class="section-head">
+              <div><span class="eyebrow">LITERATURE RADAR</span><h3>最新环肽文献</h3></div>
+              <button class="text-btn" data-jump="literature">全部文献 →</button>
+            </div>
+            <div id="dashboardPapers" class="paper-list compact"></div>
+          </section>
+
+          <section class="card">
+            <div class="section-head"><div><span class="eyebrow">TODAY</span><h3>任务焦点</h3></div><button class="text-btn" data-jump="tasks">管理 →</button></div>
+            <div id="dashboardTasks" class="task-list"></div>
+          </section>
+
+          <section class="card span-2">
+            <div class="section-head"><div><span class="eyebrow">30-DAY SIGNAL</span><h3>近期研究信号</h3></div><span class="muted">由当前文献标题/摘要粗略聚类</span></div>
+            <div id="trendBars" class="trend-bars"></div>
+          </section>
+
+          <section class="card">
+            <div class="section-head"><div><span class="eyebrow">CAPTURE</span><h3>快速记录</h3></div></div>
+            <textarea id="quickCapture" rows="5" placeholder="一个模型假设、一个构象问题、一个要验证的 descriptor……"></textarea>
+            <div class="row end"><button class="primary-btn small" id="saveQuickCapture">保存到突发奇想</button></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-literature">
+        <div class="section-hero">
+          <div><span class="eyebrow">DAILY LITERATURE</span><h2>每日新文献</h2><p>默认从 Europe PMC 拉取最新文章/预印本。你可以直接修改关键词，适配自己的项目方向。</p></div>
+          <div class="hero-actions"><button class="ghost-btn" id="notifyBtn">开启浏览器提醒</button><button class="primary-btn" id="refreshPapers">刷新文献</button></div>
+        </div>
+        <div class="filter-card card">
+          <label>检索式</label>
+          <div class="search-row"><input id="literatureQuery" type="text" /><button class="ghost-btn" id="saveQuery">保存检索式</button></div>
+          <div class="chips" id="queryPresets">
+            <button data-query='"cyclic peptide" OR "macrocyclic peptide" OR cyclopeptide OR cyclotide'>环肽综合</button>
+            <button data-query='("cyclic peptide" OR "macrocyclic peptide") AND (permeability OR "oral bioavailability")'>膜通透性</button>
+            <button data-query='("cyclic peptide" OR "macrocyclic peptide") AND (conformation OR conformer OR dynamics OR "molecular dynamics")'>构象 / MD</button>
+            <button data-query='("cyclic peptide" OR "macrocyclic peptide") AND (design OR docking OR generative OR machine learning)'>计算设计 / AI</button>
+          </div>
+        </div>
+        <div class="list-toolbar">
+          <div><span id="paperCountLabel">0 篇</span><span class="muted" id="paperLastSync"></span></div>
+          <div class="segmented"><button class="active" data-paper-filter="all">全部</button><button data-paper-filter="unread">未归档</button><button data-paper-filter="archived">已归档</button></div>
+        </div>
+        <div id="paperFeed" class="paper-list"></div>
+      </section>
+
+      <section class="view" id="view-progress">
+        <div class="section-hero">
+          <div><span class="eyebrow">RESEARCH PROGRESS</span><h2>研究进展</h2><p>一部分由文献流自动提取信号，一部分由你记录自己的实验/计算里程碑。</p></div>
+          <button class="primary-btn" id="addProgressBtn">+ 新进展</button>
+        </div>
+        <div class="two-col">
+          <section class="card">
+            <div class="section-head"><div><span class="eyebrow">SIGNALS</span><h3>近期主题雷达</h3></div></div>
+            <div id="progressTrends" class="trend-bars large"></div>
+          </section>
+          <section class="card">
+            <div class="section-head"><div><span class="eyebrow">MY LOG</span><h3>我的研究日志</h3></div></div>
+            <div id="progressList" class="timeline"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-tasks">
+        <div class="section-hero">
+          <div><span class="eyebrow">TASKS</span><h2>日常任务</h2><p>用项目、优先级和截止日期组织计算任务、阅读任务与写作任务。</p></div>
+          <button class="primary-btn" id="addTaskBtn">+ 新任务</button>
+        </div>
+        <div class="list-toolbar"><div class="segmented"><button class="active" data-task-filter="open">未完成</button><button data-task-filter="today">今天</button><button data-task-filter="all">全部</button></div><span class="muted" id="taskSummary"></span></div>
+        <div id="taskBoard" class="task-board"></div>
+      </section>
+
+      <section class="view" id="view-archive">
+        <div class="section-hero">
+          <div><span class="eyebrow">PAPER ARCHIVE</span><h2>读过的文献归档</h2><p>论文按作者自动建立索引，同时保留标题、期刊、DOI/PMID、归档时间和你的备注。</p></div>
+          <button class="ghost-btn" id="exportArchiveBtn">导出 Bib-like JSON</button>
+        </div>
+        <div class="archive-layout">
+          <aside class="card author-index"><div class="section-head"><h3>作者索引</h3><span id="authorCount" class="muted"></span></div><div id="authorList"></div></aside>
+          <section class="card"><div class="section-head"><div><span class="eyebrow">READ PAPERS</span><h3 id="archiveHeading">全部归档</h3></div></div><div id="archivePapers" class="paper-list"></div></section>
+        </div>
+      </section>
+
+      <section class="view" id="view-databases">
+        <div class="section-hero">
+          <div><span class="eyebrow">DATABASES</span><h2>环肽相关数据库</h2><p>优先放直接服务于环肽结构、通透性、天然环肽、抗菌肽与三维结构检索的资源。这里的条目可以由你自己新增、编辑和删除。</p></div>
+          <button class="primary-btn" id="addDatabaseBtn">+ 新数据库</button>
+        </div>
+        <div id="databaseGrid" class="database-grid"></div>
+      </section>
+
+      <section class="view" id="view-ideas">
+        <div class="section-hero">
+          <div><span class="eyebrow">IDEAS</span><h2>突发奇想</h2><p>先捕获，不要求完整。后续可以转成任务或研究进展。</p></div>
+          <button class="primary-btn" id="addIdeaBtn">+ 新灵感</button>
+        </div>
+        <div id="ideaGrid" class="idea-grid"></div>
+      </section>
+
+      <section class="view" id="view-tutorials">
+        <div class="section-hero">
+          <div><span class="eyebrow">COMPUTATIONAL NOTEBOOK</span><h2>计算相关教程</h2><p>预置一组更贴近环肽计算的教程骨架。每一条都可以由你新增、编辑或删除，适合逐步沉淀自己的脚本、参数与踩坑记录。</p></div>
+          <button class="primary-btn" id="addTutorialBtn">+ 新教程</button>
+        </div>
+        <div id="tutorialGrid" class="tutorial-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="taskDialog">
+    <form method="dialog" id="taskForm" class="dialog-card">
+      <div class="dialog-head"><div><span class="eyebrow">TASK</span><h3>新建任务</h3></div><button class="icon-btn" value="cancel" type="submit">×</button></div>
+      <label>任务<input name="title" required placeholder="例如：跑一轮 500 ns REMD" /></label>
+      <div class="form-grid"><label>项目<input name="project" placeholder="Permeability / Docking / Paper" /></label><label>优先级<select name="priority"><option value="high">高</option><option value="medium" selected>中</option><option value="low">低</option></select></label></div>
+      <label>截止日期<input name="due" type="date" /></label>
+      <div class="dialog-actions"><button class="ghost-btn" value="cancel" type="submit">取消</button><button class="primary-btn" value="default" type="submit">保存任务</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="ideaDialog">
+    <form method="dialog" id="ideaForm" class="dialog-card">
+      <div class="dialog-head"><div><span class="eyebrow">IDEA</span><h3>记录灵感</h3></div><button class="icon-btn" value="cancel" type="submit">×</button></div>
+      <label>内容<textarea name="text" rows="6" required placeholder="问题、假设、方法、数据想法……"></textarea></label>
+      <label>标签<input name="tags" placeholder="例如：conformer, permeability, ML" /></label>
+      <div class="dialog-actions"><button class="ghost-btn" value="cancel" type="submit">取消</button><button class="primary-btn" value="default" type="submit">保存灵感</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="progressDialog">
+    <form method="dialog" id="progressForm" class="dialog-card">
+      <div class="dialog-head"><div><span class="eyebrow">PROGRESS</span><h3>记录研究进展</h3></div><button class="icon-btn" value="cancel" type="submit">×</button></div>
+      <label>标题<input name="title" required placeholder="例如：完成通透性基线模型" /></label>
+      <label>内容<textarea name="text" rows="5" placeholder="结果、结论、下一步……"></textarea></label>
+      <label>项目<input name="project" placeholder="项目名" /></label>
+      <div class="dialog-actions"><button class="ghost-btn" value="cancel" type="submit">取消</button><button class="primary-btn" value="default" type="submit">保存进展</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="databaseDialog">
+    <form method="dialog" id="databaseForm" class="dialog-card wide">
+      <div class="dialog-head"><div><span class="eyebrow">DATABASE</span><h3 id="databaseDialogTitle">新增数据库</h3></div><button class="icon-btn" value="cancel" type="submit">×</button></div>
+      <div class="form-grid"><label>名称<input name="name" required placeholder="例如：CycPeptMPDB" /></label><label>图标缩写<input name="icon" maxlength="4" placeholder="例如：MP" /></label></div>
+      <label>网址<input name="url" type="url" required placeholder="https://..." /></label>
+      <label>简介<textarea name="desc" rows="4" placeholder="这个数据库解决什么问题、适合什么场景……"></textarea></label>
+      <label>标签<input name="tags" placeholder="例如：膜通透性, HELM, benchmark" /></label>
+      <label>备注<input name="note" placeholder="例如：版本、记录数量、更新时间" /></label>
+      <div class="form-help">标签请用英文逗号或中文逗号分隔。修改内容会保存在当前浏览器，并包含在“导出全部 JSON”备份中。</div>
+      <div class="dialog-actions"><button class="ghost-btn" value="cancel" type="submit">取消</button><button class="primary-btn" value="default" type="submit">保存数据库</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="tutorialDialog">
+    <form method="dialog" id="tutorialForm" class="dialog-card wide">
+      <div class="dialog-head"><div><span class="eyebrow">TUTORIAL</span><h3 id="tutorialDialogTitle">新增计算教程</h3></div><button class="icon-btn" value="cancel" type="submit">×</button></div>
+      <label>标题<input name="title" required placeholder="例如：Amber + REST2 环肽增强采样" /></label>
+      <label>说明<textarea name="desc" rows="3" placeholder="这篇教程解决什么计算问题……"></textarea></label>
+      <label>步骤 / 要点<textarea name="bullets" rows="6" placeholder="每行一个要点，例如：
+准备非天然残基参数
+构建 replica ladder
+检查交换率"></textarea></label>
+      <label>代码 / 命令<textarea name="code" rows="12" spellcheck="false" placeholder="# 在这里粘贴 Python、bash、GROMACS、Amber、OpenMM 等代码"></textarea></label>
+      <div class="form-help">步骤按“一行一个要点”解析；代码按原格式显示。你也可以把完整 protocol、参数或报错处理记在这里。</div>
+      <div class="dialog-actions"><button class="ghost-btn" value="cancel" type="submit">取消</button><button class="primary-btn" value="default" type="submit">保存教程</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="settingsDialog">
+    <form method="dialog" class="dialog-card wide">
+      <div class="dialog-head"><div><span class="eyebrow">SETTINGS</span><h3>设置与备份</h3></div><button class="icon-btn" value="cancel" type="submit">×</button></div>
+      <div class="settings-block"><h4>数据策略</h4><p>任务、归档、进展、灵感、数据库和计算教程默认存储在当前浏览器 localStorage。适合个人本地工作台；跨设备同步建议后续接 Supabase/SQLite/Notion/Obsidian。</p></div>
+      <div class="settings-block"><h4>备份</h4><div class="row wrap"><button class="ghost-btn" type="button" id="exportAllBtn">导出全部 JSON</button><label class="file-btn">导入 JSON<input type="file" id="importAllInput" accept="application/json" hidden /></label></div></div>
+      <div class="settings-block danger-zone"><h4>危险操作</h4><button class="danger-btn" type="button" id="resetBtn">清空本地数据</button></div>
+      <div class="dialog-actions"><button class="primary-btn" value="cancel" type="submit">完成</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script>
+const STORAGE_KEY = 'cyclolab-workbench-v1';
+const DEFAULT_QUERY = '"cyclic peptide" OR "macrocyclic peptide" OR cyclopeptide OR cyclotide';
+const DEFAULT_STATE = {
+  query: DEFAULT_QUERY,
+  tasks: [
+    { id: 'starter-literature', title: '精读 1 篇近期环肽计算论文', project: 'Literature', priority: 'high', due: todayISO(), done: false },
+    { id: 'starter-research', title: '整理本周构象采样结果与下一步假设', project: 'Research', priority: 'medium', due: '', done: false }
+  ],
+  ideas: [],
+  archive: [],
+  progress: [],
+  papers: [],
+  paperSyncDate: '',
+  paperSyncAt: ''
+};
+
+const databases = [
+  {
+    name: 'CyclicPepedia', icon: 'CP', url: 'https://www.biosino.org/iMAC/cyclicpepedia/',
+    desc: '天然与合成环肽知识库，覆盖序列、结构、生物活性、药代与相关文献。',
+    tags: ['环肽综合', '结构', '药代', '知识图谱'], note: '2024 论文报道 8,744 条环肽记录'
+  },
+  {
+    name: 'CycPeptMPDB', icon: 'MP', url: 'https://cycpeptmpdb.com/',
+    desc: '专注环肽膜通透性的结构化数据库，适合 QSAR、描述符、构象与 permeability benchmark。',
+    tags: ['膜通透性', 'HELM', '3D-PSA', 'download'], note: '站点 v1.2：7,991 个结构唯一环肽'
+  },
+  {
+    name: 'CyBase', icon: 'CB', url: 'https://www.cybase.org.au/',
+    desc: '骨架环化蛋白/肽数据库，尤其适合 cyclotide、orbitide、环化蛋白的序列与结构检索。',
+    tags: ['cyclotide', '序列', '结构', '天然产物'], note: '站点标注 2026-03-05 更新'
+  },
+  {
+    name: 'DRAMP', icon: 'DR', url: 'https://dramp.cpu-bioinfor.org/',
+    desc: '抗菌肽数据库，包含序列、结构、活性、临床/专利等信息；对环状 AMP 和带非天然残基肽很有补充价值。',
+    tags: ['AMP', '活性', 'SMILES', 'FASTS'], note: 'V5.0，2026-06-23 更新'
+  },
+  {
+    name: 'RCSB PDB', icon: '3D', url: 'https://www.rcsb.org/',
+    desc: '实验三维结构与计算结构入口。可用于查环肽-靶标复合物、构象模板、结合位点与结构相似性。',
+    tags: ['PDB', '复合物', '3D', '结构检索'], note: '通用结构基础设施'
+  },
+  {
+    name: 'PubChem', icon: 'PC', url: 'https://pubchem.ncbi.nlm.nih.gov/',
+    desc: '小分子/中分子化学结构与性质资源。PUG-REST 适合在脚本中按 CID/SMILES 批量取属性。',
+    tags: ['SMILES', 'SDF', 'CID', 'PUG-REST'], note: '适合自动化结构元数据补全'
+  }
+];
+
+const tutorials = [
+  {
+    title: 'RDKit：环肽结构标准化与 descriptor',
+    desc: '从 SMILES/SDF 读入宏环结构，做标准化、基本 2D descriptor 和批量导出。',
+    bullets: ['检查手性与价态', '计算 MW / TPSA / LogP / HBD / HBA', '把 descriptor 表与实验通透性拼接'],
+    code: `from rdkit import Chem\nfrom rdkit.Chem import Descriptors, Crippen, rdMolDescriptors\n\nmol = Chem.MolFromSmiles(smiles)\nrow = {\n    "MW": Descriptors.MolWt(mol),\n    "cLogP": Crippen.MolLogP(mol),\n    "TPSA": rdMolDescriptors.CalcTPSA(mol),\n    "HBD": rdMolDescriptors.CalcNumHBD(mol),\n    "HBA": rdMolDescriptors.CalcNumHBA(mol),\n}`
+  },
+  {
+    title: '构象生成：宏环不是“小分子 ETKDG 直接跑”',
+    desc: '建立环肽 conformer ensemble 时，重点控制手性、酰胺键、环闭合与能量筛选。',
+    bullets: ['多起点/多种子采样', '分层 RMSD 聚类去冗余', '水相与低极性环境分别评估', '保留构象权重，不只看最低能'],
+    code: `# 伪代码框架\nfor seed in seeds:\n    conformers = embed_macrocycle(mol, seed=seed)\n    conformers = minimize(conformers)\n    pool.extend(conformers)\n\nclusters = rmsd_cluster(pool, cutoff=1.0)\nrepresentatives = rank_by_energy_and_diversity(clusters)`
+  },
+  {
+    title: 'OpenMM：环肽显式溶剂 MD 工作流',
+    desc: '适合快速搭建可复现 MD：参数化 → 溶剂化 → 平衡 → production → 构象分析。',
+    bullets: ['非天然残基先明确参数来源', '记录 force field 与 charge provenance', '输出 torsion / SASA / intramolecular H-bond / Rg'],
+    code: `# 核心思路（示意）\n# 1) topology + parameters\n# 2) add solvent / ions\n# 3) minimize\n# 4) NVT/NPT equilibration\n# 5) production with checkpoints\n# 6) analyze ensemble, not a single snapshot`
+  },
+  {
+    title: '通透性建模：从 descriptor 到 ensemble-aware ML',
+    desc: '把单一 2D QSAR 升级为考虑构象、环境与实验 assay 差异的建模框架。',
+    bullets: ['先按 assay 类型分层/建协变量', '避免随机切分造成 scaffold 泄漏', '用 macrocycle-aware split 做外推评估', '加入 ensemble statistics 与 conformational entropy proxy'],
+    code: `features = concat([\n    descriptors_2d,\n    ensemble_mean(descriptors_3d),\n    ensemble_std(descriptors_3d),\n    intramol_hbond_stats,\n    assay_covariates,\n])\n\n# split: scaffold / publication / time-aware` 
+  },
+  {
+    title: '对接与复合物：先处理“环肽柔性”再谈打分',
+    desc: '环肽 docking 的关键不是把配体塞进 pocket，而是正确覆盖结合态候选构象。',
+    bullets: ['ensemble docking > 单构象 docking', '必要时使用 induced-fit / peptide-aware protocol', '用实验约束、突变数据或交联信息筛解', 'MD/重打分用于排序，不应替代构象覆盖'],
+    code: `# 推荐思路\nconformer_pool -> docking per conformer\n               -> pose clustering\n               -> restraint filtering\n               -> local relaxation / MD\n               -> consensus ranking`
+  },
+  {
+    title: '文献自动化：Europe PMC / PubMed → 个人知识库',
+    desc: '把检索、去重、摘要提取、标签和本地归档自动化，减少重复搜索。',
+    bullets: ['检索式版本化', 'DOI/PMID 去重', '按日期增量更新', '作者/主题双索引', '后续可接 LLM 做结构化摘要'],
+    code: `# Europe PMC REST (示意)\nGET /webservices/rest/search\n  ?query=("cyclic peptide" OR cyclotide) sort_date:y\n  &format=json\n  &resultType=core\n  &pageSize=25`
+  }
+];
+
+const trendDefs = [
+  ['膜通透 / 口服', ['permeab', 'oral bioavail', 'pampa', 'caco', 'membrane']],
+  ['构象 / 动力学', ['conformation', 'conformer', 'dynamics', 'molecular dynamics', 'ensemble']],
+  ['设计 / 生成模型', ['design', 'generative', 'machine learning', 'deep learning', 'diffusion', 'language model']],
+  ['对接 / PPI', ['docking', 'protein-protein', 'ppi', 'binding mode', 'complex']],
+  ['环化 / 合成', ['cyclization', 'macrocyclization', 'synthesis', 'ligation']],
+  ['非天然残基 / N-甲基化', ['non-natural', 'unnatural', 'n-methyl', 'n methyl', 'modified residue']]
+];
+
+let state = loadState();
+let currentPaperFilter = 'all';
+let currentTaskFilter = 'open';
+let currentAuthor = '__all__';
+let editingDatabaseId = null;
+let editingTutorialId = null;
+
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function formatDate(value){ if(!value) return '无截止日期'; const d = new Date(value + (value.length===10?'T00:00:00':'')); return d.toLocaleDateString('zh-CN',{month:'short',day:'numeric',year: d.getFullYear()!==new Date().getFullYear()?'numeric':undefined}); }
+function escapeHTML(v=''){ return String(v).replace(/[&<>'"]/g, s=>({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[s])); }
+function stripTags(v=''){ const el=document.createElement('div'); el.innerHTML=v; return el.textContent||''; }
+function normalizeState(data={}){
+  const next={...structuredClone(DEFAULT_STATE),...data};
+  const sourceDatabases=Array.isArray(data.databases)?data.databases:databases;
+  const sourceTutorials=Array.isArray(data.tutorials)?data.tutorials:tutorials;
+  next.databases=structuredClone(sourceDatabases).map((d,i)=>({id:d.id||`db-${i}-${String(d.name||'item').toLowerCase().replace(/[^a-z0-9]+/g,'-')}`,name:'',icon:'DB',url:'',desc:'',tags:[],note:'',...d}));
+  next.tutorials=structuredClone(sourceTutorials).map((t,i)=>({id:t.id||`tut-${i}`,title:'',desc:'',bullets:[],code:'',...t}));
+  return next;
+}
+function loadState(){ try{ const raw=localStorage.getItem(STORAGE_KEY); return normalizeState(raw?JSON.parse(raw):{}); }catch{ return normalizeState({}); } }
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); renderStats(); }
+function toast(msg){ const el=$('#toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove('show'),2200); }
+function uniqueId(){ return (globalThis.crypto && typeof crypto.randomUUID==='function') ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`; }
+
+function setToday(){ const now=new Date(); $('#todayLabel').textContent=now.toLocaleDateString('zh-CN',{weekday:'long',year:'numeric',month:'long',day:'numeric'}); }
+
+function switchView(name){
+  $$('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${name}`));
+  $$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
+  const labels={dashboard:'研究总览',literature:'每日文献',progress:'研究进展',tasks:'日常任务',archive:'文献归档',databases:'环肽数据库',ideas:'突发奇想',tutorials:'计算教程'};
+  $('#pageTitle').textContent=labels[name]||'CycloLab';
+  history.replaceState(null,'',`#${name}`);
+  $('#sidebar').classList.remove('open');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(name==='archive') renderArchive();
+  if(name==='tasks') renderTasks();
+  if(name==='ideas') renderIdeas();
+  if(name==='progress') renderProgress();
+}
+
+function paperKey(p){ return p.doi || p.pmid || p.id || p.title; }
+function isArchived(p){ const key=paperKey(p); return state.archive.some(x=>paperKey(x)===key); }
+function paperUrl(p){ if(p.doi) return `https://doi.org/${p.doi}`; if(p.pmid) return `https://pubmed.ncbi.nlm.nih.gov/${p.pmid}/`; if(p.pmcid) return `https://europepmc.org/articles/${p.pmcid}`; return `https://europepmc.org/search?query=${encodeURIComponent(p.title)}`; }
+
+function normalizePaper(r){
+  const authors=(r.authorList?.author||[]).map(a=>a.fullName||[a.firstName,a.lastName].filter(Boolean).join(' ')).filter(Boolean);
+  return {
+    id:r.id||r.pmid||r.pmcid||r.doi||r.title,
+    pmid:r.pmid||'', pmcid:r.pmcid||'', doi:r.doi||'',
+    title:stripTags(r.title||'Untitled'),
+    authors,
+    journal:r.journalTitle||r.journalInfo?.journal?.title||r.source||'Unknown source',
+    pubDate:r.firstPublicationDate||r.electronicPublicationDate||r.pubYear||'',
+    year:r.pubYear||String(r.firstPublicationDate||'').slice(0,4),
+    abstract:stripTags(r.abstractText||''),
+    citedBy:r.citedByCount||0,
+    source:'Europe PMC'
+  };
+}
+
+async function fetchLiterature(force=false){
+  if(!force && state.paperSyncDate===todayISO() && state.papers.length){ renderAllPaperViews(); return; }
+  setPaperLoading(true);
+  const query=state.query || DEFAULT_QUERY;
+  const url=`https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=${encodeURIComponent(query + ' sort_date:y')}&format=json&resultType=core&pageSize=25`;
+  try{
+    const res=await fetch(url,{headers:{'Accept':'application/json'}});
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data=await res.json();
+    const papers=(data.resultList?.result||[]).map(normalizePaper).filter(p=>p.title);
+    if(!papers.length) throw new Error('No results');
+    const oldKeys=new Set(state.papers.map(paperKey));
+    const newlyFound=papers.filter(p=>!oldKeys.has(paperKey(p))).length;
+    state.papers=papers;
+    state.paperSyncDate=todayISO();
+    state.paperSyncAt=new Date().toISOString();
+    saveState();
+    renderAllPaperViews();
+    if(force) toast(`已同步 ${papers.length} 篇最新文献`);
+    if(newlyFound && 'Notification' in window && Notification.permission==='granted') new Notification('CycloLab 文献更新',{body:`发现 ${newlyFound} 篇新记录，打开工作台查看。`});
+  }catch(err){
+    console.warn('Literature API failed',err);
+    if(!state.papers.length) state.papers=demoPapers();
+    renderAllPaperViews();
+    $('#paperSourceStatus').textContent='实时接口暂不可用';
+    $('#paperLastSync').textContent=' · 当前显示本地/示例记录';
+    toast('文献接口暂不可用，已保留本地内容');
+  }finally{ setPaperLoading(false); }
+}
+
+function demoPapers(){
+  return [
+    {id:'demo-cyclicpepedia',title:'CyclicPepedia: a knowledge base of natural and synthetic cyclic peptides',authors:['Lei Liu','Liu Yang','Suqi Cao','Zhigang Gao','Bin Yang','Guoqing Zhang','Ruixin Zhu','Dingfeng Wu'],journal:'Briefings in Bioinformatics',pubDate:'2024-03-27',year:'2024',doi:'10.1093/bib/bbae190',pmid:'38678388',abstract:'示例记录：综合环肽知识库，覆盖天然与合成环肽、结构、活性、药代和相关文献。',source:'示例记录'},
+    {id:'demo-cycpeptmpdb',title:'CycPeptMPDB: A Comprehensive Database of Membrane Permeability of Cyclic Peptides',authors:['Jingwen Li','Kohji Yanagisawa','Mizuki Sugita','Takatsugu Fujie','Masahito Ohue','Yutaka Akiyama'],journal:'Journal of Chemical Information and Modeling',pubDate:'2023-03-21',year:'2023',doi:'10.1021/acs.jcim.2c01573',pmid:'36930969',abstract:'示例记录：环肽膜通透性数据库，包含结构、HELM 表示和实验通透性数据。',source:'示例记录'}
+  ];
+}
+
+function setPaperLoading(flag){
+  $('#refreshPapers').disabled=flag;
+  $('#refreshPapers').textContent=flag?'同步中…':'刷新文献';
+}
+
+function renderAllPaperViews(){ renderLiterature(); renderDashboardPapers(); renderTrends(); renderStats(); }
+
+function renderLiterature(){
+  $('#literatureQuery').value=state.query||DEFAULT_QUERY;
+  const feed=$('#paperFeed');
+  let papers=[...state.papers];
+  if(currentPaperFilter==='unread') papers=papers.filter(p=>!isArchived(p));
+  if(currentPaperFilter==='archived') papers=papers.filter(isArchived);
+  $('#paperCountLabel').textContent=`${papers.length} 篇`;
+  $('#paperLastSync').textContent=state.paperSyncAt?` · ${new Date(state.paperSyncAt).toLocaleString('zh-CN')} 同步`:' · 尚未完成实时同步';
+  feed.innerHTML=papers.length?papers.map(p=>paperCardHTML(p)).join(''):'<div class="empty">当前筛选下没有文献。</div>';
+  bindPaperActions(feed);
+}
+
+function paperCardHTML(p, compact=false){
+  const archived=isArchived(p);
+  const authorText=(p.authors||[]).slice(0, compact?4:8).join(', ') + ((p.authors||[]).length>(compact?4:8)?' et al.':'');
+  return `<article class="paper-card">
+    <div class="paper-meta"><span>${escapeHTML(p.pubDate||p.year||'Date n/a')}</span><span>${escapeHTML(p.journal||'')}</span>${p.source?`<span>${escapeHTML(p.source)}</span>`:''}${p.citedBy?`<span>Cited ${p.citedBy}</span>`:''}</div>
+    <h4 class="paper-title"><a href="${paperUrl(p)}" target="_blank" rel="noopener">${escapeHTML(p.title)}</a></h4>
+    <div class="paper-authors">${escapeHTML(authorText||'Authors unavailable')}</div>
+    ${compact?'':(p.abstract?`<p class="paper-abstract">${escapeHTML(p.abstract)}</p>`:'')}
+    <div class="paper-actions">
+      <button data-archive-paper="${escapeHTML(paperKey(p))}" class="${archived?'archived':''}">${archived?'✓ 已归档':'读过 / 归档'}</button>
+      ${p.doi?`<a href="https://doi.org/${escapeHTML(p.doi)}" target="_blank" rel="noopener">DOI</a>`:''}
+      ${p.pmid?`<a href="https://pubmed.ncbi.nlm.nih.gov/${escapeHTML(p.pmid)}/" target="_blank" rel="noopener">PubMed</a>`:''}
+    </div>
+  </article>`;
+}
+
+function bindPaperActions(root){
+  $$('[data-archive-paper]',root).forEach(btn=>btn.addEventListener('click',()=>toggleArchive(btn.dataset.archivePaper)));
+}
+
+function toggleArchive(key){
+  const idx=state.archive.findIndex(p=>paperKey(p)===key);
+  if(idx>=0){ state.archive.splice(idx,1); toast('已从归档移除'); }
+  else{
+    const p=state.papers.find(p=>paperKey(p)===key);
+    if(!p) return;
+    state.archive.unshift({...p, archivedAt:new Date().toISOString(), note:''});
+    toast('已归档，并建立作者索引');
+  }
+  saveState(); renderAllPaperViews(); renderArchive();
+}
+
+function renderDashboardPapers(){
+  const root=$('#dashboardPapers'); const papers=state.papers.slice(0,4);
+  root.innerHTML=papers.length?papers.map(p=>paperCardHTML(p,true)).join(''):'<div class="empty">同步文献后，这里会显示最新记录。</div>';
+  bindPaperActions(root);
+}
+
+function renderStats(){
+  $('#statPapers').textContent=state.papers.length||0;
+  $('#statTasks').textContent=state.tasks.filter(t=>!t.done).length;
+  $('#statArchive').textContent=state.archive.length;
+  $('#statIdeas').textContent=state.ideas.length;
+  $('#paperSourceStatus').textContent=state.paperSyncAt?'Europe PMC 已同步':'等待实时同步';
+}
+
+function computeTrends(){
+  const text=state.papers.map(p=>`${p.title} ${p.abstract}`).join(' ').toLowerCase();
+  return trendDefs.map(([name,keys])=>({name,count:keys.reduce((n,k)=>n+(text.match(new RegExp(k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g'))||[]).length,0)}));
+}
+function trendHTML(){
+  const data=computeTrends(); const max=Math.max(...data.map(x=>x.count),1);
+  return data.map(x=>`<div class="trend-item"><label>${escapeHTML(x.name)}</label><div class="bar-track"><div class="bar-fill" style="width:${Math.max(4,(x.count/max)*100)}%"></div></div><b>${x.count}</b></div>`).join('');
+}
+function renderTrends(){ $('#trendBars').innerHTML=trendHTML(); $('#progressTrends').innerHTML=trendHTML(); }
+
+function addTask(fd){
+  const title=String(fd.get('title')||'').trim(); if(!title) return;
+  state.tasks.unshift({id:uniqueId(),title,project:String(fd.get('project')||'').trim(),priority:String(fd.get('priority')||'medium'),due:String(fd.get('due')||''),done:false});
+  saveState(); renderTasks(); renderDashboardTasks(); toast('任务已添加');
+}
+function toggleTask(id){ const t=state.tasks.find(t=>t.id===id); if(t){t.done=!t.done;saveState();renderTasks();renderDashboardTasks();} }
+function deleteTask(id){ state.tasks=state.tasks.filter(t=>t.id!==id);saveState();renderTasks();renderDashboardTasks();toast('任务已删除'); }
+function filteredTasks(){
+  let arr=[...state.tasks];
+  if(currentTaskFilter==='open') arr=arr.filter(t=>!t.done);
+  if(currentTaskFilter==='today') arr=arr.filter(t=>t.due===todayISO() && !t.done);
+  return arr;
+}
+function renderDashboardTasks(){
+  const root=$('#dashboardTasks'); const arr=state.tasks.filter(t=>!t.done).slice(0,6);
+  root.innerHTML=arr.length?arr.map(t=>taskRowHTML(t)).join(''):'<div class="empty">今日没有未完成任务。</div>';
+  bindTaskRows(root);
+}
+function taskRowHTML(t){ return `<div class="task-row ${t.done?'done':''}"><button class="task-check ${t.done?'done':''}" data-toggle-task="${t.id}" aria-label="切换任务状态"></button><div class="task-copy"><strong>${escapeHTML(t.title)}</strong><small>${escapeHTML(t.project||'未分类')} · ${t.due?formatDate(t.due):'无截止日期'}</small></div><i class="priority ${t.priority}"></i></div>`; }
+function bindTaskRows(root){ $$('[data-toggle-task]',root).forEach(b=>b.addEventListener('click',()=>toggleTask(b.dataset.toggleTask))); }
+function renderTasks(){
+  const tasks=filteredTasks();
+  $('#taskSummary').textContent=`未完成 ${state.tasks.filter(t=>!t.done).length} / 共 ${state.tasks.length}`;
+  const groups=[['high','高优先级'],['medium','中优先级'],['low','低优先级']];
+  $('#taskBoard').innerHTML=groups.map(([key,label])=>`<section class="task-column"><h3>${label}</h3>${tasks.filter(t=>t.priority===key).map(t=>`<article class="task-card"><h4>${escapeHTML(t.title)}</h4><div class="task-footer"><span>${escapeHTML(t.project||'未分类')}</span><span>${t.due?formatDate(t.due):'无截止'}</span></div><div class="task-controls"><button data-toggle-task="${t.id}">${t.done?'恢复':'完成'}</button><button data-delete-task="${t.id}">删除</button></div></article>`).join('')||'<div class="empty">暂无</div>'}</section>`).join('');
+  bindTaskRows($('#taskBoard')); $$('[data-delete-task]').forEach(b=>b.addEventListener('click',()=>deleteTask(b.dataset.deleteTask)));
+}
+
+function addIdea(text,tags=''){
+  text=String(text||'').trim(); if(!text) return;
+  state.ideas.unshift({id:uniqueId(),text,tags:String(tags||'').split(',').map(s=>s.trim()).filter(Boolean),createdAt:new Date().toISOString()});
+  saveState(); renderIdeas(); toast('灵感已保存');
+}
+function renderIdeas(){
+  const root=$('#ideaGrid');
+  root.innerHTML=state.ideas.length?state.ideas.map(i=>`<article class="idea-card card"><span class="eyebrow">${new Date(i.createdAt).toLocaleString('zh-CN')}</span><p>${escapeHTML(i.text)}</p><div class="idea-meta">${(i.tags||[]).map(t=>`<span>#${escapeHTML(t)}</span>`).join('')}</div><div class="idea-actions"><button data-idea-task="${i.id}">转任务</button><button data-delete-idea="${i.id}">删除</button></div></article>`).join(''):'<div class="empty">还没有灵感条目。任何不成熟的想法都可以先记下来。</div>';
+  $$('[data-delete-idea]').forEach(b=>b.addEventListener('click',()=>{state.ideas=state.ideas.filter(i=>i.id!==b.dataset.deleteIdea);saveState();renderIdeas();}));
+  $$('[data-idea-task]').forEach(b=>b.addEventListener('click',()=>{const i=state.ideas.find(x=>x.id===b.dataset.ideaTask);if(i){state.tasks.unshift({id:uniqueId(),title:i.text.slice(0,100),project:'Idea',priority:'medium',due:'',done:false});saveState();renderTasks();renderDashboardTasks();toast('已转成任务');}}));
+}
+
+function addProgress(fd){
+  const title=String(fd.get('title')||'').trim(); if(!title)return;
+  state.progress.unshift({id:uniqueId(),title,text:String(fd.get('text')||'').trim(),project:String(fd.get('project')||'').trim(),createdAt:new Date().toISOString()});
+  saveState(); renderProgress(); toast('研究进展已记录');
+}
+function renderProgress(){
+  renderTrends();
+  $('#progressList').innerHTML=state.progress.length?state.progress.map(p=>`<article class="timeline-item"><h4>${escapeHTML(p.title)}</h4>${p.text?`<p>${escapeHTML(p.text)}</p>`:''}<div class="timeline-meta">${escapeHTML(p.project||'Research')} · ${new Date(p.createdAt).toLocaleString('zh-CN')}</div></article>`).join(''):'<div class="empty">暂无个人研究日志。建议记录“完成了什么 → 看到了什么 → 下一步是什么”。</div>';
+}
+
+function renderArchive(){
+  const authorMap=new Map();
+  state.archive.forEach(p=>(p.authors||[]).forEach(a=>{ if(!authorMap.has(a)) authorMap.set(a,[]); authorMap.get(a).push(p); }));
+  const authors=[...authorMap.entries()].sort((a,b)=>b[1].length-a[1].length || a[0].localeCompare(b[0]));
+  $('#authorCount').textContent=`${authors.length} 位`;
+  $('#authorList').innerHTML=`<button class="author-entry ${currentAuthor==='__all__'?'active':''}" data-author="__all__">全部作者 <span>${state.archive.length}</span></button>` + authors.map(([a,ps])=>`<button class="author-entry ${currentAuthor===a?'active':''}" data-author="${escapeHTML(a)}">${escapeHTML(a)} <span>${ps.length}</span></button>`).join('');
+  $$('[data-author]').forEach(b=>b.addEventListener('click',()=>{currentAuthor=b.dataset.author;renderArchive();}));
+  const papers=currentAuthor==='__all__'?state.archive:state.archive.filter(p=>(p.authors||[]).includes(currentAuthor));
+  $('#archiveHeading').textContent=currentAuthor==='__all__'?'全部归档':currentAuthor;
+  const root=$('#archivePapers'); root.innerHTML=papers.length?papers.map(p=>paperCardHTML(p)).join(''):'<div class="empty">还没有归档文献。请在“每日文献”中点击“读过 / 归档”。</div>'; bindPaperActions(root);
+}
+
+function openDatabaseEditor(id=null){
+  editingDatabaseId=id;
+  const form=$('#databaseForm'); form.reset();
+  $('#databaseDialogTitle').textContent=id?'编辑数据库':'新增数据库';
+  if(id){
+    const d=state.databases.find(x=>x.id===id); if(!d)return;
+    form.elements.name.value=d.name||''; form.elements.icon.value=d.icon||''; form.elements.url.value=d.url||'';
+    form.elements.desc.value=d.desc||''; form.elements.tags.value=(d.tags||[]).join(', '); form.elements.note.value=d.note||'';
+  }
+  $('#databaseDialog').showModal();
+}
+function saveDatabase(fd){
+  const item={
+    id:editingDatabaseId||uniqueId(), name:String(fd.get('name')||'').trim(), icon:String(fd.get('icon')||'DB').trim().slice(0,4)||'DB',
+    url:String(fd.get('url')||'').trim(), desc:String(fd.get('desc')||'').trim(),
+    tags:String(fd.get('tags')||'').split(/[，,]/).map(x=>x.trim()).filter(Boolean), note:String(fd.get('note')||'').trim()
+  };
+  if(editingDatabaseId){ state.databases=state.databases.map(x=>x.id===editingDatabaseId?item:x); }
+  else state.databases.unshift(item);
+  editingDatabaseId=null; saveState(); renderDatabases(); toast('数据库条目已保存');
+}
+function deleteDatabase(id){
+  const d=state.databases.find(x=>x.id===id); if(!d)return;
+  if(confirm(`删除数据库“${d.name}”？`)){ state.databases=state.databases.filter(x=>x.id!==id); saveState(); renderDatabases(); }
+}
+function renderDatabases(){
+  const root=$('#databaseGrid');
+  root.innerHTML=state.databases.length?state.databases.map(d=>`<article class="db-card card"><div class="db-top"><div class="db-icon">${escapeHTML(d.icon||'DB')}</div><span class="muted">${escapeHTML(d.note||'')}</span></div><h3>${escapeHTML(d.name)}</h3><p>${escapeHTML(d.desc)}</p><div class="db-tags">${(d.tags||[]).map(t=>`<span>${escapeHTML(t)}</span>`).join('')}</div>${d.url?`<a href="${escapeHTML(d.url)}" target="_blank" rel="noopener">打开数据库 ↗</a>`:''}<div class="resource-actions"><button data-edit-db="${d.id}">编辑</button><button class="delete" data-delete-db="${d.id}">删除</button></div></article>`).join(''):'<div class="empty">还没有数据库条目。点击“新数据库”建立自己的资源索引。</div>';
+  $$('[data-edit-db]',root).forEach(b=>b.addEventListener('click',()=>openDatabaseEditor(b.dataset.editDb)));
+  $$('[data-delete-db]',root).forEach(b=>b.addEventListener('click',()=>deleteDatabase(b.dataset.deleteDb)));
+}
+function openTutorialEditor(id=null){
+  editingTutorialId=id;
+  const form=$('#tutorialForm'); form.reset();
+  $('#tutorialDialogTitle').textContent=id?'编辑计算教程':'新增计算教程';
+  if(id){
+    const t=state.tutorials.find(x=>x.id===id); if(!t)return;
+    form.elements.title.value=t.title||''; form.elements.desc.value=t.desc||'';
+    form.elements.bullets.value=(t.bullets||[]).join('\n'); form.elements.code.value=t.code||'';
+  }
+  $('#tutorialDialog').showModal();
+}
+function saveTutorial(fd){
+  const item={
+    id:editingTutorialId||uniqueId(), title:String(fd.get('title')||'').trim(), desc:String(fd.get('desc')||'').trim(),
+    bullets:String(fd.get('bullets')||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean), code:String(fd.get('code')||'')
+  };
+  if(editingTutorialId){ state.tutorials=state.tutorials.map(x=>x.id===editingTutorialId?item:x); }
+  else state.tutorials.unshift(item);
+  editingTutorialId=null; saveState(); renderTutorials(); toast('计算教程已保存');
+}
+function deleteTutorial(id){
+  const t=state.tutorials.find(x=>x.id===id); if(!t)return;
+  if(confirm(`删除教程“${t.title}”？`)){ state.tutorials=state.tutorials.filter(x=>x.id!==id); saveState(); renderTutorials(); }
+}
+function renderTutorials(){
+  const root=$('#tutorialGrid');
+  root.innerHTML=state.tutorials.length?state.tutorials.map((t,i)=>`<article class="tutorial-card card"><span class="tut-number">NOTE ${String(i+1).padStart(2,'0')}</span><h3>${escapeHTML(t.title)}</h3><p>${escapeHTML(t.desc)}</p><details><summary>展开教程</summary>${(t.bullets||[]).length?`<ul>${t.bullets.map(x=>`<li>${escapeHTML(x)}</li>`).join('')}</ul>`:''}${t.code?`<pre><code>${escapeHTML(t.code)}</code></pre>`:''}</details><div class="resource-actions"><button data-edit-tutorial="${t.id}">编辑</button><button class="delete" data-delete-tutorial="${t.id}">删除</button></div></article>`).join(''):'<div class="empty">还没有教程。点击“新教程”建立自己的计算知识库。</div>';
+  $$('[data-edit-tutorial]',root).forEach(b=>b.addEventListener('click',()=>openTutorialEditor(b.dataset.editTutorial)));
+  $$('[data-delete-tutorial]',root).forEach(b=>b.addEventListener('click',()=>deleteTutorial(b.dataset.deleteTutorial)));
+}
+
+function exportJSON(filename,data){ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+
+function wireEvents(){
+  $$('.nav-item').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
+  $$('[data-jump]').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.jump)));
+  $('#menuBtn').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));
+  $('#quickTaskBtn').addEventListener('click',()=>$('#taskDialog').showModal());
+  $('#addTaskBtn').addEventListener('click',()=>$('#taskDialog').showModal());
+  $('#quickIdeaBtn').addEventListener('click',()=>$('#ideaDialog').showModal());
+  $('#addIdeaBtn').addEventListener('click',()=>$('#ideaDialog').showModal());
+  $('#addProgressBtn').addEventListener('click',()=>$('#progressDialog').showModal());
+  $('#openSettings').addEventListener('click',()=>$('#settingsDialog').showModal());
+  $('#addDatabaseBtn').addEventListener('click',()=>openDatabaseEditor());
+  $('#addTutorialBtn').addEventListener('click',()=>openTutorialEditor());
+
+  $('#taskForm').addEventListener('submit',e=>{ if(e.submitter?.value==='cancel') return; e.preventDefault(); addTask(new FormData(e.target)); e.target.reset(); $('#taskDialog').close(); });
+  $('#ideaForm').addEventListener('submit',e=>{ if(e.submitter?.value==='cancel') return; e.preventDefault(); const fd=new FormData(e.target); addIdea(fd.get('text'),fd.get('tags')); e.target.reset(); $('#ideaDialog').close(); });
+  $('#progressForm').addEventListener('submit',e=>{ if(e.submitter?.value==='cancel') return; e.preventDefault(); addProgress(new FormData(e.target));e.target.reset();$('#progressDialog').close(); });
+  $('#databaseForm').addEventListener('submit',e=>{ if(e.submitter?.value==='cancel'){editingDatabaseId=null;return;} e.preventDefault(); saveDatabase(new FormData(e.target)); e.target.reset(); $('#databaseDialog').close(); });
+  $('#tutorialForm').addEventListener('submit',e=>{ if(e.submitter?.value==='cancel'){editingTutorialId=null;return;} e.preventDefault(); saveTutorial(new FormData(e.target)); e.target.reset(); $('#tutorialDialog').close(); });
+
+  $('#saveQuickCapture').addEventListener('click',()=>{ const el=$('#quickCapture'); if(el.value.trim()){addIdea(el.value,'quick-capture');el.value='';} });
+  $('#refreshPapers').addEventListener('click',()=>fetchLiterature(true));
+  $('#saveQuery').addEventListener('click',()=>{ state.query=$('#literatureQuery').value.trim()||DEFAULT_QUERY; state.paperSyncDate=''; saveState(); fetchLiterature(true); toast('检索式已保存'); });
+  $$('[data-query]').forEach(b=>b.addEventListener('click',()=>{ $('#literatureQuery').value=b.dataset.query; state.query=b.dataset.query; state.paperSyncDate='';saveState();fetchLiterature(true); }));
+  $$('[data-paper-filter]').forEach(b=>b.addEventListener('click',()=>{currentPaperFilter=b.dataset.paperFilter;$$('[data-paper-filter]').forEach(x=>x.classList.toggle('active',x===b));renderLiterature();}));
+  $$('[data-task-filter]').forEach(b=>b.addEventListener('click',()=>{currentTaskFilter=b.dataset.taskFilter;$$('[data-task-filter]').forEach(x=>x.classList.toggle('active',x===b));renderTasks();}));
+
+  $('#notifyBtn').addEventListener('click',async()=>{ if(!('Notification' in window)){toast('当前浏览器不支持通知');return;} const p=await Notification.requestPermission(); toast(p==='granted'?'浏览器提醒已开启：有新记录时会在打开工作台后提示':'未获得通知权限'); });
+  $('#exportArchiveBtn').addEventListener('click',()=>exportJSON(`cyclolab-archive-${todayISO()}.json`,state.archive));
+  $('#exportAllBtn').addEventListener('click',()=>exportJSON(`cyclolab-backup-${todayISO()}.json`,state));
+  $('#importAllInput').addEventListener('change',async e=>{ const file=e.target.files?.[0]; if(!file)return; try{const data=JSON.parse(await file.text());state=normalizeState(data);saveState();renderEverything();toast('备份已导入');}catch{toast('导入失败：JSON 格式不正确');} });
+  $('#resetBtn').addEventListener('click',()=>{ if(confirm('确认清空当前浏览器中的 CycloLab 数据？')){state=normalizeState({});saveState();renderEverything();toast('本地数据已清空');} });
+}
+
+function renderEverything(){
+  setToday(); renderStats(); renderDashboardPapers(); renderDashboardTasks(); renderLiterature(); renderTrends(); renderProgress(); renderTasks(); renderArchive(); renderDatabases(); renderIdeas(); renderTutorials();
+}
+
+async function init(){
+  wireEvents(); renderEverything();
+  const hash=location.hash.replace('#',''); if(hash && $(`#view-${hash}`)) switchView(hash);
+  fetchLiterature(false);
+  if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+init();
+
+  </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e"}' crossorigin="anonymous"></script>
+</body>
+</html>
